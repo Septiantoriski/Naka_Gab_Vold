@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h1 class="h3 fw-bold mb-3 text-center">Buat Akun Baru</h1>
+        <p class="text-muted text-center mb-4">Lengkapi data di bawah untuk mengakses portal customer support.</p>
+        <form method="POST" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="row g-3">
+            <div class="col-md-6">
+              {{ form.full_name.label(class_='form-label fw-semibold') }}
+              {{ form.full_name(class_='form-control form-control-lg', placeholder='Nama lengkap') }}
+              {% for error in form.full_name.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-6">
+              {{ form.username.label(class_='form-label fw-semibold') }}
+              {{ form.username(class_='form-control form-control-lg', placeholder='Username unik') }}
+              {% for error in form.username.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-12">
+              {{ form.email.label(class_='form-label fw-semibold') }}
+              {{ form.email(class_='form-control form-control-lg', placeholder='Email kantor') }}
+              {% for error in form.email.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-6">
+              {{ form.password.label(class_='form-label fw-semibold') }}
+              {{ form.password(class_='form-control form-control-lg', placeholder='Minimal 6 karakter') }}
+              {% for error in form.password.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-6">
+              {{ form.confirm_password.label(class_='form-label fw-semibold') }}
+              {{ form.confirm_password(class_='form-control form-control-lg', placeholder='Ulangi password') }}
+              {% for error in form.confirm_password.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="d-grid gap-2 mt-4">
+            {{ form.submit(class_='btn btn-primary btn-lg') }}
+          </div>
+        </form>
+        <p class="mt-4 text-center">Sudah punya akun? <a href="{{ url_for('login') }}">Masuk di sini</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
