@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+instance/
+support.db
+*.sqlite3
+.env

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex flex-column flex-lg-row gap-4">
+  <div class="flex-grow-1">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h1 class="h4 fw-bold mb-1">Dashboard Gudang</h1>
+            <p class="text-muted mb-0">Kelola barang customer support dan pantau kapasitas rak secara real-time.</p>
+          </div>
+          <a href="#visualisasi" class="btn btn-outline-primary btn-lg">Lihat Dashboard Barang</a>
+        </div>
+        <form method="POST" class="row g-3" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="col-md-6">
+            {{ form.name.label(class_='form-label fw-semibold') }}
+            {{ form.name(class_='form-control form-control-lg', placeholder='Nama barang') }}
+            {% for error in form.name.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-3">
+            {{ form.rack_slot.label(class_='form-label fw-semibold') }}
+            {{ form.rack_slot(class_='form-select form-select-lg') }}
+            {% for error in form.rack_slot.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-3">
+            {{ form.level.label(class_='form-label fw-semibold') }}
+            {{ form.level(class_='form-select form-select-lg') }}
+            {% for error in form.level.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-4">
+            {{ form.weight.label(class_='form-label fw-semibold') }}
+            <div class="input-group input-group-lg">
+              {{ form.weight(class_='form-control', placeholder='0.0') }}
+              <span class="input-group-text">Kg</span>
+            </div>
+            {% for error in form.weight.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-8 d-flex align-items-end">
+            {{ form.submit(class_='btn btn-primary btn-lg w-100') }}
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="h5 fw-bold mb-0">Riwayat Barang Terbaru</h2>
+          <span class="badge bg-primary-subtle text-primary">{{ items|length }} barang</span>
+        </div>
+        {% if items %}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Nama Barang</th>
+                <th>Slot</th>
+                <th>Posisi</th>
+                <th>Berat</th>
+                <th>Tanggal Input</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td class="fw-semibold">{{ item.name }}</td>
+                <td>{{ item.rack_slot }}</td>
+                <td>{{ 'Atas' if item.level == 1 else 'Bawah' }}</td>
+                <td>{{ '%.2f'|format(item.weight) }} Kg</td>
+                <td>{{ item.created_at.strftime('%d %B %Y %H:%M') }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <img src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/archive.svg" alt="Archive" width="72" class="mb-3 opacity-50">
+          <p class="mb-0">Belum ada data barang. Tambahkan barang pertama Anda melalui formulir di atas.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <aside class="dashboard-stats">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Statistik Cepat</h2>
+        <div class="stat-tile bg-primary-subtle text-primary">
+          <span class="label">Total Barang</span>
+          <span class="value">{{ layout.total_items }}</span>
+        </div>
+        <div class="stat-tile bg-success-subtle text-success">
+          <span class="label">Total Berat</span>
+          <span class="value">{{ '%.2f'|format(layout.total_weight) }} Kg</span>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">Distribusi Berat Rak</h2>
+        {% for rack_id, rack in layout.racks.items() %}
+        <div class="rack-summary">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Rack {{ rack_id }}</span>
+            <span class="fw-bold">{{ '%.2f'|format(rack.total) }} Kg</span>
+          </div>
+          <div class="progress mt-2" style="height: 6px;">
+            {% set progress = (rack.total / layout.total_weight * 100) if layout.total_weight else 0 %}
+            <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+</div>
+
+<section id="visualisasi" class="mt-5">
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2 class="h4 fw-bold mb-1">Visualisasi Rak</h2>
+          <p class="text-muted mb-0">Pantau kapasitas setiap slot rak dan total berat keseluruhan.</p>
+        </div>
+        <span class="badge rounded-pill text-bg-primary">Total {{ '%.2f'|format(layout.total_weight) }} Kg</span>
+      </div>
+      <div class="rack-visual">
+        {% for rack_id, rack in layout.racks.items() %}
+        <div class="rack-card">
+          <div class="rack-header">
+            <span class="rack-title">Rack {{ rack_id }}</span>
+            <span class="rack-weight">{{ '%.2f'|format(rack.total) }} Kg</span>
+          </div>
+          <div class="rack-grid">
+            {% for slot_name, slot_items in rack.slots.items() %}
+            <div class="slot">
+              <div class="slot-title">{{ slot_name }}</div>
+              <div class="slot-body">
+                {% for level in [1,2] %}
+                  {% set slot_item = slot_items[level] %}
+                  <div class="slot-cell {{ 'filled' if slot_item else 'empty' }}">
+                    <div class="slot-label">Posisi {{ 'Atas' if level == 1 else 'Bawah' }}</div>
+                    {% if slot_item %}
+                    <div class="slot-content">
+                      <p class="item-name mb-1">{{ slot_item.name }}</p>
+                      <span class="item-weight">{{ '%.2f'|format(slot_item.weight) }} Kg</span>
+                    </div>
+                    {% else %}
+                    <div class="slot-placeholder">(Kosong)</div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="rack-summary-footer">
+        <div class="summary-card">
+          <div class="summary-label">Total Berat Keseluruhan</div>
+          <div class="summary-value">{{ '%.2f'|format(layout.total_weight) }} Kg</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-label">Jumlah Slot Terisi</div>
+          <div class="summary-value">{{ layout.filled_positions }}/{{ layout.total_positions }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
